@@ -1,0 +1,71 @@
+---
+title: "Assignment 1"
+author: "Vatsal Jani"
+date: "2023-09-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#1.  Add Header Row
+```{r}
+mydf <- Typical_Employee_Survey_Data_1_
+mydf
+head(mydf)
+tail(mydf)
+str(mydf)
+colnames(mydf) <- c("Age","Gender","Satisfaction arc","Job characteristics","Years of service","Promotion likelihood","Decision autonomy","Budgetary decision","Employee pride","Another job offer","Workplace relations")
+mydf
+```
+#2. Convert the columns that need to be converted to Factors. Print out the 5-point summary for each column.
+```{r}
+mydf$Gender <- as.factor(mydf$Gender)
+mydf$`Satisfaction arc` <- as.factor(mydf$`Satisfaction arc`)
+mydf$`Job characteristics` <- as.factor(mydf$`Job characteristics`)
+mydf$`Promotion likelihood` <- as.factor(mydf$`Promotion likelihood`)
+mydf$`Decision autonomy` <- as.factor(mydf$`Employee pride`)
+mydf$`Budgetary decision` <- as.factor(mydf$`Budgetary decision`)
+mydf$`Employee pride` <- as.factor(mydf$`Employee pride`)
+mydf$`Another job offer` <- as.factor(mydf$`Another job offer`)
+mydf$`Workplace relations` <- as.factor(mydf$`Workplace relations`)
+levels(mydf$Gender) <- c("M","F")
+levels(mydf$`Satisfaction arc`) <- c("very satisfied","moderately satisfied","A little dissatisfied","very dissatisfied")
+levels(mydf$`Job characteristics`) <- c("High income","no danger of being fired","Flexible hours","Opportunities of advancement","Enjoying the work")
+levels(mydf$`Promotion likelihood`) <- c("Very likely","Likely","Not sure","Unlikely","Very unlikely")
+levels(mydf$`Decision autonomy`) <- c("Always","Much of time","Sometimes","Never")
+levels(mydf$`Employee pride`) <- c("Always","Somewhat proud","Indifferent","Not at all proud")
+levels(mydf$`Another job offer`) <- c("Very likely","Likely","Not sure","Unlikely","Very unlikely")
+levels(mydf$`Budgetary decision`) <- c("Yes","No")
+levels(mydf$`Workplace relations`) <- c("Very good","Good","So so","Bad","Very bad")
+summary(mydf)
+View(mydf)
+```
+#3.Print out the boxplot (numerical columns) for each column 
+```{r}
+boxplot(mydf$Age, main = "Age of Employee")
+boxplot(mydf$`Years of service`, main="Years of service")
+```
+
+#4. Plot the right visual for each column 
+```{r}
+hist(mydf$Age, main="Age of employee")
+plot(mydf$Gender, main="Gender")
+plot(mydf$`Satisfaction arc`, main="Satisfaction arc")
+plot(mydf$`Job characteristics`, main="Job chacteristics")
+hist(mydf$`Years of service`, main="Years of service")
+plot(mydf$`Promotion likelihood`, main="Promotion likelihood")
+plot(mydf$`Decision autonomy`, main="Decision autonomy")
+plot(mydf$`Budgetary decision`, main="Budgetary decision")
+plot(mydf$`Employee pride`, main="Employee pride")
+plot(mydf$`Another job offer`, main="another job offer")
+plot(mydf$`Workplace relations`, main="workplace relations")
+```
+#5. Plot scatter plots to show few relationships
+```{r}
+plot(Age~`Years of service`, data=mydf)
+plot(`Gender`~`Satisfaction arc`, data=mydf)
+plot(`Satisfaction arc`~`Job characteristics`, data=mydf)
+```
+
