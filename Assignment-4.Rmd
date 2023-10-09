@@ -1,0 +1,97 @@
+---
+title: "Time series data_Covid cases"
+author: "Vatsal Jani"
+date: "2023-10-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(fpp)
+library(fpp2)
+library(TTR)
+```
+
+```{r}
+attributes(Time.series.data)
+```
+```{r}
+plot(Time.series.data)
+```
+```{r}
+Acf(Time.series.data)
+```
+```{r}
+mean_revenue <- meanf(Time.series.data$Revenue,5)
+plot(mean_revenue)
+```
+#Naive method
+```{r}
+naive_revforecast <- naive(Time.series.data$Revenue,5)
+plot(naive_revforecast)
+```
+#Naive method does not work well because forecast is increasing every year and foreacsts cannot be set on the basis of last value due to randomness of data.
+
+# Seasonal Naive
+```{r}
+snaive_revforecast <- snaive(Time.series.data$Revenue,5)
+plot(snaive_revforecast)
+```
+#Seasonal Naive method does not work well because there is no seasonality in data. Forecast is increasing every year.
+
+# Random Walk
+```{r}
+rwf_revforecast <- rwf(Time.series.data$Revenue,5)
+rwf_revforecast <- rwf(Time.series.data$Revenue,5, drift=TRUE)
+plot(rwf_revforecast)
+```
+#Random walk with method seems to be a good model for this data because it allows the forecasts to increase  over time, where the amount of change over time is set to be the average change seen in the historical data.
+
+# Moving Averages
+```{r}
+MA5_revforecast <- ma(Time.series.data$Revenue,order=5)
+MA9_revforecast <- ma(Time.series.data$Revenue,order=9)
+plot(MA5_revforecast)
+plot(MA9_revforecast)
+```
+#Trend cycle for MA5 and MA9 is smoother than original data.As the order of moving average is increased, line gets smoother. This method eliminates some of the randomness observed with other models.
+
+# plot all in a single chart
+```{r}
+plot(mean_revenue)
+lines(naive_revforecast$mean,col="red")
+lines(rwf_revforecast$mean,col="green")
+lines(snaive_revforecast$mean,col="black")
+lines(MA5_revforecast,col="Pink")
+lines(MA9_revforecast,col="Blue")
+```
+#MA9 , MA5 and Random walk models seem to be good fits.
+
+# Decomposition
+```{r}
+ets_revforecast <- ets(Time.series.data$Revenue)
+plot(ets_revforecast)
+attributes(ets_revforecast)
+ets_revforecast$mse
+```
+
+
+#Forecast
+```{r}
+revforecast_ets_1 <- forecast.ets(ets_revforecast, h=5)
+plot(revforecast_ets_1)
+revforecast_ets_2 <- forecast(ets_revforecast, h=5)
+plot(revforecast_ets_2)
+```
+
+```{r}
+accuracy(naive_revforecast)
+accuracy(snaive_revforecast)
+accuracy(rwf_revforecast)
+accuracy(revforecast_ets_1)
+accuracy(revforecast_ets_2)
+```
+#Mean absolute error, mean percentage error and mean absolute percentage error are less for exponential smoothing models as comapred to naive, seasonal naive and random walk models. Hence, it can be said that exponential smoothing models is the best forecasting model for this data.
