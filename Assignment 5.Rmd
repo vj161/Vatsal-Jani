@@ -1,0 +1,68 @@
+---
+title: "Decomposition assignment"
+author: "Vatsal Jani"
+date: "2023-11-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+Time_series_data <- read_csv("C:/Users/vatsal.jani/OneDrive - Catalent/Desktop/MBA/Business forecasting/Assignments/Time series data.csv")
+View(Time_series_data)
+```
+
+```{r}
+Data <- data.table(Time_series_data$Period, Time_series_data$Revenue)
+Data
+myts <- ts(Data[,-1], start=2015, end=2020, frequency=12)
+myts
+```
+```{r}
+attributes(myts)
+```
+```{r}
+library(ggplot2)
+library(fpp)
+library(fpp2)
+decomposition <- decompose(myts)
+plot(decomposition)
+```
+#Time series is seasonal with positive trend.
+#Decomposition is additive.
+
+```{r}
+stl_decomp <- stl(myts, t.window= 13, s.window="periodic")
+plot(stl_decomp)
+```
+#Three components are shown separately in bottom three panels of plot.These components can be added together to reconstruct the data of top panel. Seasonal component changes slowly over time, so that two consecutive years have quite similar seasonal patterns. If this series is extended for even larger period, then years far apart may have little diffeent seasonal patterns. Trend is positive. Remainder component shown in the bottom panel is what is left over when seasonal and trend cycle components have been substracted from the data.
+#Revenues tend to rise in the first and last quarters of the year, primarliy due to holiday seasons. Revenues are comppartively low in second and third quarter of the year.
+#Grey bars to the right of each panelt show the relative scales of components. Each bar represents same length, but because the plots are on different scales, bars vary in size.
+
+```{r}
+library(forecast)
+Seasonality_adjusted_data <- forecast::seasadj(stl_decomp)
+plot(myts)
+lines(Seasonality_adjusted_data, col="red")
+```
+#Seasonality adjusted series (red line) contains only remainder component and trend cycle. Therefore, they are not smooth and downturns and upturns are misleading
+
+#Forecast by stl decomposition:
+```{r}
+fcast1 <- stlf(myts, method="ets")
+fcast2 <- stlf(myts, method="naive")
+fcast3 <- stlf(myts, method="rwdrift")
+fcast1
+fcast2
+fcast3
+```
+```{r}
+plot(fcast1)
+plot(fcast2)
+plot(fcast3)
+```
+#Exponential smoothening seems to be giving a better forecast after stl decomposition.
+
