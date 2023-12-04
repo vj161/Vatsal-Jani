@@ -1,0 +1,114 @@
+---
+title: "ARIMA Assignment"
+author: "Vatsal Jani"
+date: "2023-12-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+Time_series_data <- read_csv("C:/Users/vatsal.jani/OneDrive - Catalent/Desktop/MBA/Business forecasting/Assignments/Time series data.csv")
+View(Time_series_data)
+```
+
+```{r}
+Data <- data.frame(Time_series_data$Period, Time_series_data$Revenue)
+Data
+```
+```{r}
+myts <- ts(Data[,-1], start=2015, end=2020, frequency=12)
+myts
+```
+```{r}
+library(ggplot2)
+library(fpp)
+library(fpp2)
+library(forecast)
+```
+
+```{r}
+plot(myts)
+```
+```{r}
+kpss.test(myts)
+adf.test(myts)
+```
+#For KIPSS test, P value is less than 0.05, indicating that data is not staionary and differencing is required for this data to make it stationary.
+#For ADF test, P Value is less than 0.05, indicating that data is stationary and differencing is not required.
+```{r}
+ndiffs(myts)
+```
+#ndiff value of 1 indicates that first order differencing is required.
+```{r}
+nsdiffs(myts)
+```
+#nsdiff value of 1 indicates that seasonal differencing is required.
+```{r}
+tsdisplay(myts)
+```
+#ACF and Pacf plots show that there is some trend and seasonality in this data, which is increasing the variance and making data non-stationary. Hence, differencing is required.
+
+```{r}
+mytsdiff1 <- diff(myts, differences=1)
+plot(mytsdiff1)
+```
+#Upon doing first order differencing, variance is reduced and data has become somewhat stationary.
+```{r}
+kpss.test(mytsdiff1)
+adf.test(mytsdiff1)
+ndiffs(mytsdiff1)
+tsdisplay(mytsdiff1)
+```
+#After differencing,P value of Kipps test becomes 0.1, indicationg that, time series has been stationarized. This is corroborated by ndiff value of 0. No more differencing is required. However, still seasonal factor is be evaluated for data.
+```{r}
+nsdiffs(mytsdiff1)
+```
+#However, nsdiff value is still 1, which means first order seasonal differencing is still required.
+```{r}
+mytsdiff2 <- diff(mytsdiff1,12)
+tsdisplay(mytsdiff2)
+nsdiffs(mytsdiff2)
+```
+#Upon performing first order seasonal differencing of time series, nsdiff value becomes 0, which means that data is completely staionarized and no more differencing is required.  
+```{r}
+Acf(mytsdiff2, lag.max=20)
+Pacf(mytsdiff2, lag.max=20)
+```
+#, Pacf function gives significant values till lag 2 and it's significantly decaying as well. Acf function gives significant value till lag 1 and lag 3, and it also seems to be exponentially decaying very slowly. Order of sequencing is already 1 for timeseries. so, possible order for Arima function (Considering it a non-seasonal data) can be (2,1,1) or(2,1,2) or (2,1,3).
+
+```{r}
+fit_Arima1 <- Arima(myts, order=c(2,1,1))
+fit_Arima1
+```
+```{r}
+fit_Arima2 <- Arima(myts, order=c(2,1,2))
+fit_Arima2
+```
+
+#Out of three ARIMA models run above, (2,1,2) ARIMA model seems to have slightly smaller AICc value. So, that model can be used for forecasting.
+
+```{r}
+auto_fit <- auto.arima(myts, trace=TRUE, stepwise = FALSE, seasonal=FALSE, approximation=FALSE)
+auto_fit
+attributes(auto_fit)
+fcast <- forecast(auto_fit,h=5,level=c(99.5))
+plot(fcast)
+```
+```{r}
+tsdiag(auto_fit)
+```
+#The mean of residuals is close to zero and there is no significant correlation among residuals. Variation of residuals stays same across the time series. 
+
+```{r}
+Box.test(residuals(auto_fit), lag=20, type="Ljung")
+hist(auto_fit$residuals)
+```
+#Histogram suggests that residuals may not be normal. Right tail seems to be little long. However, p-value is non-significant (>0.05), indicating that there is no significant correlation in residuals of time series. Hence, this method wcan be considered quite appropriate for forecasting.
+
+
+
+
